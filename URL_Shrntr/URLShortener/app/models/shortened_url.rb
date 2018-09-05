@@ -20,9 +20,9 @@ class ShortenedUrl < ApplicationRecord
     class_name: :Visit
     
   has_many :visitors, 
-    through: :visits, 
-    source: :visitor 
-  
+    Proc.new { distinct },
+    through: :visits,
+    source: :visitor
     
     def self.random_code
       short_url = SecureRandom.urlsafe_base64(16)
@@ -39,5 +39,22 @@ class ShortenedUrl < ApplicationRecord
         long_url: long_url, 
         user_id: user.id
       ).save
+    end
+    
+    def num_clicks
+      visitors.count
+    end
+    
+    
+    def num_uniques
+      visitors.distinct.length
+    end
+    
+    def num_recent_uniques
+      count = 0
+      visitors.distinct.each do |visitor|
+        count += 1 if visitor.created_at > 10.minutes.ago
+      end
+      count
     end
 end
