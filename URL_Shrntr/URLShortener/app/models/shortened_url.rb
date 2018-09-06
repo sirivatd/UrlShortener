@@ -41,6 +41,8 @@ class ShortenedUrl < ApplicationRecord
       ).save
     end
     
+  
+    
     def num_clicks
       visitors.count
     end
@@ -51,10 +53,11 @@ class ShortenedUrl < ApplicationRecord
     end
     
     def num_recent_uniques
-      count = 0
-      visitors.distinct.each do |visitor|
-        count += 1 if visitor.created_at > 10.minutes.ago
-      end
-      count
+      # count = 0
+      # visitors.distinct.each do |visitor|
+      #   count += 1 if visitor.created_at > 10.minutes.ago
+      # end
+      # count
+      visitors.where('visits.created_at > ?', 10.minutes.ago).count
     end
 end

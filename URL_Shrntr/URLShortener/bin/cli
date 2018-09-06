@@ -1,1 +1,50 @@
 #!/usr/bin/env ruby
+require 'launchy'
+
+
+
+def get_input
+  puts "Enter your email."
+  email = gets.chomp 
+  current_user = User.where(email: email) 
+  raise "User does not exists" if current_user == []
+  puts "Logged in succesfully"
+  while 1
+    puts "Would you like to visit or shorten a URL? ('v' for visit, 's' for shorten)"
+    choice = gets.chomp
+    if choice.upcase == "S"
+      puts "Please enter a URL"
+      long_url = gets.chomp
+      begin
+        ShortenedUrl.shorten(current_user.first, long_url)
+        puts "Succesfully updated database!"
+        rescue => e
+        print e.message
+        end
+    else 
+    display_short_urls
+    end
+  end
+end
+
+def display_short_urls
+  begin
+  urls = ShortenedUrl.all
+  urls.each do |url|
+    puts("Id: #{url.id}, Long_url: #{url.long_url}, Short_url: #{url.short_url}")
+  end
+  puts "Please enter the id of the URL you want to visit"
+  chosen_id = gets.chomp.to_i
+  raise "Chosen Id does not exists" unless ShortenedUrl.where(id: chosen_id).exists?
+  target_url = ShortenedUrl.where(id: chosen_id)
+  p target_url.first.long_url
+  Launchy.open(target_url.first.long_url)
+  rescue => e
+  e.message
+  end
+end
+
+
+if __FILE__ == $PROGRAM_NAME
+  get_input
+end 
